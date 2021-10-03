@@ -23,9 +23,12 @@ app.get('/', function(req, res) {
 // /api/shorturl middleware
 app.post('/api/shorturl', function(req, res, next) {
   let urlToLookup = req.body.url;
-  const auxRegExp = /^https?:\/\//;
+  const auxRegExp = /^https?:\/\//i;
   if (auxRegExp.test(urlToLookup)) {
     urlToLookup = urlToLookup.replace(auxRegExp, '');
+    if (!/\s/.test(urlToLookup) && /\//.test(urlToLookup)) {
+      urlToLookup = urlToLookup.split('/')[0];
+    }
     dns.lookup(urlToLookup, (error) => {
       if (error && error.code === 'ENOTFOUND') {
         res.json({error: 'invalid url'});
@@ -47,7 +50,7 @@ app.post('/api/shorturl', function(req, res) {
   if (!shortenedUrls.includes(reqUrl)) {
     shortenedUrls.push(reqUrl);
   };
-  res.json({ original_url: reqUrl, short_url: shortenedUrls.indexOf(reqUrl) + 1 });
+  res.json({original_url: reqUrl, short_url: shortenedUrls.indexOf(reqUrl) + 1 });  
 });
 
 app.get('/api/shorturl/:num', function(req, res) {
